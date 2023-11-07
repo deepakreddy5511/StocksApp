@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        .form-container {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #888888;
+            max-width: 400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .user-details{
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #888888;
+            max-width: 450px;
+            margin-right: 20px; /* Add margin to create space */
+            text-align: left; /* Align the content to the left */
+        }
+        .user-stocks {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #888888;
+            max-width: 450px;
+            margin-right: 300px;
+            text-align: left; /* Align the content to the left */
+        }
+        .form {
+            text-align: center;
+        }
+        .input-field {
+            margin: 10px 0;
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #1e87d1;
+        }
+        .user-details{
+            margin-left: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container1">
+        <h1>User Details</h1>
+        <div class="form-container">
+            <form class="form" id="userDetailsForm">
+                <input type="text" class="input-field" id="userId" placeholder="User ID">
+                <input type="password" class="input-field" id="password" placeholder="Password">
+                <button class="button" type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div class="user-details" id="userDetails" style="display: none;"></div>
+    <div class="user-stocks" id="userStocks" style="display: none;"></div>
+</body>
+<script>
+    document.getElementById("userDetailsForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Get input values
+        const userId = document.getElementById("userId").value;
+        const password = document.getElementById("password").value;
+
+        // Create a JSON object
+        const loginDto = {
+            userId: userId,
+            password: password
+        };
+        console.log(loginDto);
+
+        // Send the JSON data to the backend
+        fetch('http://localhost:8092/user/login', {
+            mode: 'cors',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginDto)
+        })
+        .then(response => {
+            if (response.status === 200) {
+            // Handle a successful response from the backend
+                 return response.text(); // Parse response as text
+            } else {
+                 console.error('Error:', response.status);
+                return null; // Handle errors or other responses
+            }
+        })
+        .then(data => {
+            if (data !== null) {
+                // Check if you have received "Login success" in the response
+                if (data === "Login success") {
+                    // If login was successful, make another request
+                    fetch(`http://localhost:8093/portfolio/details/${userId}`, {
+                        mode: 'cors',
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            return response.json();
+                        } else {
+                            console.error('Error in second request:', response.status);
+                            return null; // Handle errors or other responses
+                        }
+                    })
+                    .then(secondData => {
+                        if (secondData) {
+                            displayUserDetails(secondData);
+
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error in second request:', error);
+                    });
+                }
+            }
+        })
+        
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
+    function displayUserDetails(data) {
+            const container = document.getElementById("container");
+            const userDetailsForm = document.getElementById("container1");
+            const userDetails = document.getElementById("userDetails");
+            const userStocks = document.getElementById("userStocks");
+
+            userDetails.innerHTML = "<h2>User Information</h2>";
+
+            // Display specific values in different HTML tags
+            userDetails.innerHTML += `<p><strong>User ID:</strong> <span id="userId">${data.userDetails.userId}</span></p>`;
+            userDetails.innerHTML += `<p><strong>User Name:</strong> <span id="userName">${data.userDetails.userName}</span></p>`;
+            userDetails.innerHTML += `<p><strong>Phone Number:</strong> <span id="phoneNumber">${data.userDetails.phoneNumber}</span></p>`;
+            userDetails.innerHTML += `<p><strong>Email:</strong> <span id="email">${data.userDetails.email}</span></p>`;
+            userDetails.innerHTML += `<p><strong>PAN Number:</strong> <span id="panNumber">${data.userDetails.panNumber}</span></p>`;
+            userDetails.innerHTML += `<p><strong>Aadhar Number:</strong> <span id="adharNumber">${data.userDetails.adharNumber}</span></p>`;
+            userDetails.innerHTML += `<p><strong>City:</strong> <span id="city">${data.userDetails.city}</span></p>`;
+            userDetails.innerHTML += `<p><strong>Bank Account Number:</strong> <span id="bankAccountNumber">${data.userDetails.bankAccountNumber}</span></p>`;
+            userDetails.innerHTML += `<p><strong>Role:</strong> <span id="role">${data.userDetails.role}</span></p>`;
+            userDetails.innerHTML += `<p><strong>Password:</strong> <span id="password">${data.userDetails.password}</span></p>`;
+            userDetails.innerHTML += `<p><strong>Balance:</strong> <span id="Balance">${data.funds}</span></p>`;
+            userStocks.innerHTML = "<h2>User Stocks</h2>";
+            data.stockDetails.forEach(stock => {
+                userStocks.innerHTML += `<p><strong>User ID</strong> ${stock.id}<br><strong>Stock Code:</strong> ${stock.stockCode}<br><strong>Stock Name:</strong> ${stock.stockName}<br> <strong>No of Units:</strong> ${stock.noOfUnits}<br><strong>Current StockPrice:</strong> ${stock.currentStockPrice}</p>`;
+            });
+            userDetailsForm.style.display = "none"; // Hide the form
+            userDetails.style.display = "block"; 
+            userStocks.style.display = "block";// Show the user details
+        }
+
+        // Call the function with the JSON data to display user details and hide the form
+</script>
+
+
+</html>

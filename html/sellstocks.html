@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Stocks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        .form-container {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #888888;
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center; /* Center the form content */
+        }
+        .user-details {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #888888;
+            max-width: 450px;
+            margin-right: 20px; /* Add margin to create space */
+            text-align: center; /* Align the content to the left */
+            display: none;
+        }
+        .form {
+            text-align: center;
+        }
+        .input-field {
+            margin: 10px 0;
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #1e87d1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container1">
+        <h1>Sell Stocks</h1>
+        <div class="form-container">
+            <form class="form" id="sellStock">
+
+                <input id="userId" type="text" class="input-field" placeholder="User Id">
+                <input id="password" type="password" class="input-field" placeholder="Password">
+                <input id="stockName" type="input-field" class="input-field" placeholder="Stock Name">
+                <input id="stockCode" type="input-field" class="input-field" placeholder="Stock Code">
+                <input id="unitsToSell" type="number" class="input-field" placeholder="Number of Units to sell">
+
+                <button class="button" type="submit">Sell</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="user-details" id="sellStock1" style="display: none;"></div>
+
+</body>
+
+<script>
+    document.getElementById("sellStock").addEventListener("submit", function (event) {
+          event.preventDefault(); // Prevent the default form submission
+
+        //Get the inputs
+        const id = document.getElementById("userId").value;
+        const password = document.getElementById("password").value;
+        const stockName = document.getElementById("stockName").value;
+        const stockCode = document.getElementById("stockCode").value;
+        const unitsToSell = document.getElementById("unitsToSell").value;
+        //const currentStockPrice = document.getElementById("currentStockPrice").value;
+
+
+        // Create a JSON object
+        const stockDto = {
+            id: id,
+            password: password,
+            stockName: stockName,
+            stockCode: stockCode,
+            noOfUnitsToSell: unitsToSell
+        };
+        console.log(stockDto);
+
+         // Send the JSON data to the backend
+         fetch('http://localhost:8097/buy/sellStocks', {
+            mode: 'cors',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(stockDto)
+        })
+
+        .then(response => {
+            if (response.status === 200) {
+            // Handle a successful response from the backend
+             
+                 return response.json(); // Parse response as text
+            } else {
+                 console.error('Error:', response.status);
+                return null; // Handle errors or other responses
+            }
+        })
+
+        .then(stockToBuy => {
+                        if (stockToBuy) {
+                            console.log(stockToBuy);
+                            displayUserDetails(stockToBuy);
+                        }
+                    })
+                    .catch(error => {
+            console.error('Error buying stock:', error);
+                    });
+
+        
+                    
+    });
+
+
+    
+    function displayUserDetails(stockToBuy) {
+            const container = document.getElementById("container");
+            const userDetailsForm = document.getElementById("container1");
+            const sellStock = document.getElementById("sellStock1");
+
+            console.log(stockToBuy);
+            sellStock.innerHTML = "<h2>Selling stocks!</h2>";
+
+       
+            // Display specific values in different HTML tags
+            sellStock.innerHTML += `<p><strong>Stock ID:</strong> <span id="stockId">${stockToBuy.id}</span></p>`;
+            sellStock.innerHTML += `<p><strong>Stock Name:</strong> <span id="stockName">${stockToBuy.stockName}</span></p>`;
+            sellStock.innerHTML += `<p><strong>Stock Code:</strong> <span id="stockCode">${stockToBuy.stockCode}</span></p>`;
+            sellStock.innerHTML += `<p><strong>Current Stock Price:</strong> <span id="currentStockPrice">${stockToBuy.currentStockPrice}</span></p>`;
+            sellStock.innerHTML += `<p><strong>Units Sold: </strong> <span id="unitsToSell">${stockToBuy.noOfUnitsToSell}</span></p>`;
+            sellStock.innerHTML += `<p><strong>Error message: </strong> <span id="errorMessage">${stockToBuy.errorMessage}</span></p>`;
+
+
+
+            userDetailsForm.style.display = "none"; // Hide the form
+            sellStock.style.display = "block"; // Show the user details
+        }
+</script>
+
+</html>

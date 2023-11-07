@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create User</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        .form-container {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #888888;
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center; /* Center the form content */
+        }
+        .form {
+            text-align: center;
+        }
+        .input-field {
+            margin: 10px 0;
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #1e87d1;
+        }
+        .output{
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #888888;
+            max-width: 450px;
+            margin-right: 20px; /* Add margin to create space */
+            text-align: left; /* Align the content to the left */
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container1">
+        <h1>Create User</h1>
+        <div class="form-container">
+            <form class="form" id="userForm">
+                <input id="userName" type="text" class="input-field" placeholder="Username">
+                <input id="phoneNumber" type="text" class="input-field" placeholder="Phone Number">
+                <input id="email" type="email" class="input-field" placeholder="Email">
+                <input id="panNumber" type="text" class="input-field" placeholder="PAN Number">
+                <input id="adharNumber" type="text" class="input-field" placeholder="Aadhar Number">
+                <input id="city" type="text" class="input-field" placeholder="City">
+                <input id="bankAccountNumber" type="text" class="input-field" placeholder="Bank Account Number">
+                <input id="role" type="text" class="input-field" placeholder="Role">
+                <input id="password" type="password" class="input-field" placeholder="Password">
+                <button class="button" type="submit">Create</button>
+            </form>
+        </div>
+    </div>
+    <div class="output" id="out"></div>
+</body>
+<script>
+    // Get a reference to the form
+    const userForm = document.getElementById("userForm");
+
+    // Add a submit event listener to the form
+    userForm.addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Create an object to store user input data
+        const userData = {
+            userName: document.getElementById("userName").value,
+            phoneNumber: document.getElementById("phoneNumber").value,
+            email: document.getElementById("email").value,
+            panNumber: document.getElementById("panNumber").value,
+            adharNumber: document.getElementById("adharNumber").value,
+            city: document.getElementById("city").value,
+            bankAccountNumber: document.getElementById("bankAccountNumber").value,
+            role: document.getElementById("role").value,
+            password: document.getElementById("password").value,
+        };
+
+        // Convert user data to JSON format
+        const jsonData = JSON.stringify(userData);
+
+        // Send the data to your Spring Boot endpoint using fetch
+        fetch('http://localhost:8092/user/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: jsonData
+        })
+        .then(response => {
+            if (response.status === 201) {
+                // Successful response handling
+                console.log('User Created successfully');
+                return response.json();
+                // output.innerHTML = "<h2>User Created successfully</h2>"
+
+            } else {
+                // Handle errors
+                console.error('User Creation unsuccessful');
+                // output.innerHTML = "<h2>User Creation unsuccessful</h2>"
+            }
+        })
+        .then(data =>{
+            if(data){
+                displayDetails(data);
+
+            }
+        })
+        .catch(error => {
+            console.error('Network error:', error);
+        });
+    });
+    function displayDetails(data){
+        const output = document.getElementById("out");
+        const form = document.getElementById("container1");
+        output.innerHTML = "<h2>User Created successfully</h2>"
+        output.innerHTML += `<p><strong>User ID:</strong> <span id="userId">${data.userId}</span></p>`;
+        output.innerHTML += `<p><strong>User Name:</strong> <span id="userName">${data.userName}</span></p>`;
+        output.innerHTML += `<p><strong>Please note down your user id for login purpose</p>`;
+        form.style.display = "none"; // Hide the form
+        output.style.display = "block";
+    }
+</script>
+
+</html>
