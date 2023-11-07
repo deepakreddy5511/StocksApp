@@ -1,0 +1,25 @@
+server:
+  port: 8091
+spring:
+  application:
+    name: funds-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/Stocks
+    username: root
+    password: 123
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  cloud:
+    loadbalancer:
+      ribbon:
+        enable: false
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8762/eureka
